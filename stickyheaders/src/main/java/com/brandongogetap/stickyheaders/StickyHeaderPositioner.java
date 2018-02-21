@@ -225,15 +225,22 @@ final class StickyHeaderPositioner {
         recyclerView.getAdapter().onBindViewHolder(currentViewHolder, headerPosition);
         this.currentHeader = currentViewHolder.itemView;
         callAttach(headerPosition);
-        resolveElevationSettings(currentHeader.getContext());
-        // Set to Invisible until we position it in #checkHeaderPositions.
-        currentHeader.setVisibility(View.INVISIBLE);
-        currentHeader.setId(R.id.header_view);
-        getRecyclerParent().addView(currentHeader);
-        if (checkMargins) {
-            updateLayoutParams(currentHeader);
-        }
-        dirty = false;
+		/*
+		 * If user in attach listener (previous line) calls <code></>stickyLayoutManger.setStickyDisabled(false)</code>
+		 * layout manager will call <code>reset()</code> on this class which will make <code>currentHeader</code> null.
+		 * Therefore we need to check if <code>currentHeader</code> still exists at this point.
+		 */
+		if (currentHeader != null) {
+			resolveElevationSettings(currentHeader.getContext());
+			// Set to Invisible until we position it in #checkHeaderPositions.
+			currentHeader.setVisibility(View.INVISIBLE);
+			currentHeader.setId(R.id.header_view);
+			getRecyclerParent().addView(currentHeader);
+			if (checkMargins) {
+				updateLayoutParams(currentHeader);
+			}
+			dirty = false;
+		}
     }
 
     private int currentDimension() {

@@ -23,6 +23,7 @@ public class StickyLayoutManager extends LinearLayoutManager {
     private List<Integer> headerPositions = new ArrayList<>();
     private RecyclerViewRetriever viewRetriever;
     private int headerElevation = StickyHeaderPositioner.NO_ELEVATION;
+    private boolean stickyEnabled = true;
     @Nullable private StickyHeaderListener listener;
 
     public StickyLayoutManager(Context context, StickyHeaderHandler headerHandler) {
@@ -51,6 +52,21 @@ public class StickyLayoutManager extends LinearLayoutManager {
             positioner.setListener(listener);
         }
     }
+
+	public boolean isStickyEnabled() {
+		return stickyEnabled;
+	}
+
+	public void setStickyEnabled(boolean enable) {
+		stickyEnabled = enable;
+		if (positioner != null) {
+			if (enable) {
+				runPositionerInit();
+			} else {
+				positioner.clearHeader();
+			}
+		}
+	}
 
     /**
      * Enable or disable elevation for Sticky Headers.
@@ -90,7 +106,7 @@ public class StickyLayoutManager extends LinearLayoutManager {
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
         int scroll = super.scrollVerticallyBy(dy, recycler, state);
-        if (Math.abs(scroll) > 0) {
+        if (stickyEnabled && Math.abs(scroll) > 0) {
             if (positioner != null) {
                 positioner.updateHeaderState(
                         findFirstVisibleItemPosition(), getVisibleHeaders(), viewRetriever, findFirstCompletelyVisibleItemPosition() == 0);
@@ -103,7 +119,7 @@ public class StickyLayoutManager extends LinearLayoutManager {
     public int scrollHorizontallyBy(int dx, RecyclerView.Recycler recycler, RecyclerView.State state) {
         int scroll = super.scrollHorizontallyBy(dx, recycler, state);
         if (Math.abs(scroll) > 0) {
-            if (positioner != null) {
+            if (stickyEnabled && positioner != null) {
                 positioner.updateHeaderState(
                         findFirstVisibleItemPosition(), getVisibleHeaders(), viewRetriever, findFirstCompletelyVisibleItemPosition() == 0);
             }
@@ -135,7 +151,9 @@ public class StickyLayoutManager extends LinearLayoutManager {
 
     private void runPositionerInit() {
         positioner.reset(getOrientation());
-        positioner.updateHeaderState(findFirstVisibleItemPosition(), getVisibleHeaders(), viewRetriever, findFirstCompletelyVisibleItemPosition() == 0);
+        if (stickyEnabled) {
+			positioner.updateHeaderState(findFirstVisibleItemPosition(), getVisibleHeaders(), viewRetriever, findFirstCompletelyVisibleItemPosition() == 0);
+		}
     }
 
     private Map<Integer, View> getVisibleHeaders() {
