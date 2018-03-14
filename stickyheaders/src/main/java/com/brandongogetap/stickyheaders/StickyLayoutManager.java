@@ -137,6 +137,9 @@ public class StickyLayoutManager extends LinearLayoutManager {
     @Override
     public void onAttachedToWindow(RecyclerView view) {
         Preconditions.validateParentView(view);
+        if (positioner != null) {
+        	positioner.clearHeader();
+		}
         viewRetriever = new RecyclerViewRetriever(view);
         positioner = new StickyHeaderPositioner(view);
         positioner.setElevateHeaders(headerElevation);
